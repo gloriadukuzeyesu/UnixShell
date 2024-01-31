@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
             const char *directory = commands[0].argv[1];
             // if nothing is provided, direct it to home
             if (directory == nullptr) {
+                // chdir() changes the current working directory of the calling
+                //  process to the directory specified in path. Return 0 on success and - 1 on error.
                 if (chdir(getenv("HOME")) != 0) {
                     perror("error in directing to HOME");
                 }
@@ -58,6 +60,8 @@ int main(int argc, char *argv[]) {
             for (Command cmd: commands) { // for each command, create a fork
                 pid_t pid = fork();
                 if (pid == 0) {
+                    // fork is a success, child has been created.
+
                     // if there is input redirection, update the standard input file descriptor
                     if (cmd.fdStdin != 0) {
                         if (dup2(cmd.fdStdin, STDIN_FILENO) == -1) { // make FdStdin the new standard input
@@ -74,7 +78,9 @@ int main(int argc, char *argv[]) {
                     if ((execvp(cmd.exec.c_str(), const_cast<char *const *>(cmd.argv.data()))) == -1) {
                         perror("Error executing cmd ");
                     }
+
                 } else if (pid > 0) {
+                    // pid is greater than 0. Parent waiting for the child to terminate and clean up.
                     if (cmd.fdStdout != 1) {
                         close(cmd.fdStdout);
                     }

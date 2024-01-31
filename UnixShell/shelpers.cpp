@@ -88,20 +88,20 @@ std::vector<Command> getCommands(const std::vector<std::string> &tokens) {
     std::vector<Command> ret(std::count(tokens.begin(), tokens.end(), "|") + 1);  //1 + num |'s commands
 
     int first = 0;
-    int last = std::find(tokens.begin(), tokens.end(), "|") - tokens.begin();
+    int last = std::find(tokens.begin(), tokens.end(), "|") - tokens.begin(); // the index of the first
+    // occurrence of | in the token vector.??
     bool error = false;
     // declare the fd for the files
     //int fd1 = 0, fd2 = 0;
 
     for (int i = 0; i < ret.size(); ++i) {
-        if ((tokens[first] == "&") || (tokens[first] == "<") ||
-            (tokens[first] == ">") || (tokens[first] == "|")) {
+        if( (tokens[first] == "&") || (tokens[first] == "<") || (tokens[first] == ">") || (tokens[first] == "|") ) {
             error = true;
             break;
         }
 
-        ret[i].exec = tokens[first];
-        ret[i].argv.push_back(tokens[first].c_str()); //argv0 = program name
+        ret[i].exec = tokens[first]; //the name of the executable
+        ret[i].argv.push_back(tokens[first].c_str()); //argv[0] = program name
         std::cout << "exec start: " << ret[i].exec << std::endl;
         ret[i].fdStdin = 0; // stdin
         ret[i].fdStdout = 1; // stdout
@@ -120,8 +120,7 @@ std::vector<Command> getCommands(const std::vector<std::string> &tokens) {
                         error = true;
                         break;
                     }
-                    ret[i].fdStdin = open(tokens[j + 1].c_str(),
-                                          O_RDONLY); // if i = 0, create a file descriptor with read only flag
+                    ret[i].fdStdin = open(tokens[j + 1].c_str(), O_RDONLY); // if i = 0, create a file descriptor with read only flag
                     if (ret[i].fdStdin == -1) { // open error check
                         perror("Error with open syscall");
                         error = true;
@@ -151,6 +150,8 @@ std::vector<Command> getCommands(const std::vector<std::string> &tokens) {
             }
 
         }
+
+
         // TODO handles pipes
         if (i > 0) {
             /* there are multiple commands.  Open a pipe and
